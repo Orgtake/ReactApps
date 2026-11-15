@@ -1,3 +1,4 @@
+
 name: Deploy React App
 
 on:
@@ -9,9 +10,18 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: games/clicker-game
+
     steps:
       - uses: actions/checkout@v4
 
@@ -20,18 +30,21 @@ jobs:
           node-version: 20
 
       - run: npm install
+
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: games/clicker-game/dist
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
